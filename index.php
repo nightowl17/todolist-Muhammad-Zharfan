@@ -94,10 +94,7 @@ if (isset($_POST['toggle_id'])) {
             </li>
         <?php endforeach; ?>
     </ul>
-    <div class="yt-circle-bottom">
-    <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank"> CLICK ME
-    </a>
-    </div>
+    
 
 </body>
 </html>
