@@ -47,6 +47,27 @@ if (isset($_POST['toggle_id'])) {
     exit();
 }
 
+// Handle edit
+if (isset($_POST['edit_id']) && isset($_POST['edited_name'])) {
+    $editId = (int) $_POST['edit_id'];
+    $editedName = trim($_POST['edited_name']);
+
+    if ($editedName !== '') {
+        foreach ($tasks as &$task) {
+            if ($task['id'] === $editId) {
+                $task['name'] = $editedName;
+                break;
+            }
+        }
+        unset($task); // break reference
+    }
+
+    //  Redirect to clear ?edit=ID and prevent form resubmission
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
+
 ?>
 
 <!DOCTYPE html>
@@ -69,30 +90,48 @@ if (isset($_POST['toggle_id'])) {
     </form>
 
     <ul class="list-group">
-        <?php foreach ($tasks as $task): ?>
-            <li class="list-group-item d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center">
-                    <form method="post" class="me-2">
-                        <input type="hidden" name="toggle_id" value="<?= $task['id'] ?>">
-                        <input
-                            type="checkbox"
-                            class="check-tugas"
-                            name="status"
-                            value="selesai"
-                            onchange="this.form.submit()"
-                            <?= $task['status'] === 'selesai' ? 'checked' : '' ?>
-                        >
+    <?php foreach ($tasks as $task): ?>
+        <li class="list-group-item d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <!-- Checkbox form -->
+                <form method="post" class="me-2">
+                    <input type="hidden" name="toggle_id" value="<?= $task['id'] ?>">
+                    <input
+                        type="checkbox"
+                        class="check-tugas"
+                        name="status"
+                        value="selesai"
+                        onchange="this.form.submit()"
+                        <?= $task['status'] === 'selesai' ? 'checked' : '' ?>
+                    >
+                </form>
+
+                <?php if (isset($_GET['edit']) && $_GET['edit'] == $task['id']): ?>
+                    <!-- Edit mode -->
+                    <form method="post" class="d-flex align-items-center me-2">
+                        <input type="hidden" name="edit_id" value="<?= $task['id'] ?>">
+                        <input type="text" name="edited_name" value="<?= htmlspecialchars($task['name']) ?>" class="form-control form-control-sm me-2" required>
+                        <button type="submit" class="btn btn-primary btn-sm">Simpan</button>
+                        <a href="index.php" class="btn btn-secondary btn-sm ms-1">Batal</a>
                     </form>
+                <?php else: ?>
+                    <!-- Normal view -->
                     <span style="<?= $task['status'] === 'selesai' ? 'text-decoration: line-through;' : '' ?>">
                         <?= htmlspecialchars($task['name']) ?>
                     </span>
-                </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="d-flex">
+                <a href="?edit=<?= $task['id'] ?>" class="btn btn-warning btn-sm me-2">Edit</a>
                 <form method="post">
                     <input type="hidden" name="delete_id" value="<?= $task['id'] ?>">
                     <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
                 </form>
-            </li>
-        <?php endforeach; ?>
+            </div>
+        </li>
+    <?php endforeach; ?>
+
     </ul>
     
 
